@@ -33,14 +33,7 @@ where
 
     fn get(&mut self, key: K) -> Option<&V> {
         match self.accessed.contains(&key) {
-            true => swap(
-                self.accessed
-                    .iter()
-                    .position(|accessed_key| accessed_key == &key)
-                    .unwrap(),
-                self.accessed.len() - 1,
-                &mut self.accessed,
-            ),
+            true => move_accessed_key_to_end(key, &mut self.accessed),
             false => self.accessed.push(key),
         }
 
@@ -57,7 +50,24 @@ where
     }
 }
 
-fn swap<K: Copy>(i: usize, j: usize, arr: &mut Vec<K>) {
+fn move_accessed_key_to_end<K: Copy + Eq>(accessed_key: K, accessed_arr: &mut Vec<K>) {
+    let mut i: usize = 0;
+    let mut j: usize = accessed_arr.len() - 1;
+
+    while i < j {
+        if accessed_arr[i] == accessed_key && accessed_arr[j] == accessed_key {
+            j -= 1;
+        } else if accessed_arr[i] == accessed_key && accessed_arr[j] != accessed_key {
+            swap_key(i, j, accessed_arr);
+            i += 1;
+            j -= 1;
+        } else {
+            i += 1;
+        }
+    }
+}
+
+fn swap_key<K: Copy>(i: usize, j: usize, arr: &mut Vec<K>) {
     let temp: K = arr[j];
     arr[j] = arr[i];
     arr[i] = temp;
