@@ -32,11 +32,21 @@ where
     }
 
     fn get(&mut self, key: K) -> Option<&V> {
-        self.accessed.push(key);
+        match self.accessed.contains(&key) {
+            true => swap(
+                self.accessed
+                    .iter()
+                    .position(|accessed_key| accessed_key == &key)
+                    .unwrap(),
+                self.accessed.len() - 1,
+                &mut self.accessed,
+            ),
+            false => self.accessed.push(key),
+        }
 
         if self.accessed.len() > self.max_size {
-            let accessed_key = self.accessed.remove(0);
-            self.map.remove(&accessed_key);
+            let lru_key = self.accessed.remove(0);
+            self.map.remove(&lru_key);
         }
 
         self.map.get(&key)
@@ -47,6 +57,12 @@ where
     }
 }
 
+fn swap<K: Copy>(i: usize, j: usize, arr: &mut Vec<K>) {
+    let temp: K = arr[j];
+    arr[j] = arr[i];
+    arr[i] = temp;
+}
+
 #[test]
 fn cache_clears() {
     let mut cache = Cache::<&str, &str>::initialize(2);
@@ -54,12 +70,18 @@ fn cache_clears() {
     cache.set("one", "uno");
     cache.set("two", "dos");
     cache.set("three", "tres");
+    cache.set("four", "quattro");
+    cache.set("five", "cinco");
 
-    cache.get("three");
     cache.get("two");
+    cache.get("three");
     cache.get("one");
+    cache.get("two");
+    cache.get("four");
+    cache.get("five");
 
     assert_eq!(cache.map.len(), 2);
     assert_eq!(cache.accessed.len(), 2);
-    assert_eq!(cache.get("uno"), None);
+    assert_eq!(*cache.get("four").unwrap(), "quattro");
+    assert_eq!(*cache.get("five").unwrap(), "cinco");
 }
