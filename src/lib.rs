@@ -1,11 +1,7 @@
-use std::{
-    cmp::{Eq, Ord},
-    collections::HashMap,
-    hash::Hash,
-};
+use std::{cmp::Eq, collections::HashMap, hash::Hash};
 
 /// TODO: implement this trait
-trait LRUCache<K: Eq + Hash + Ord, V> {
+trait LRUCache<K, V> {
     /// Initialize the cache with `max` items stored
     fn initialize(max: usize) -> Self;
     /// Retrieve the value stored by key, if it exists
@@ -14,13 +10,13 @@ trait LRUCache<K: Eq + Hash + Ord, V> {
     fn set(&mut self, key: K, value: V);
 }
 
-pub struct Cache<K: Eq + Hash, V> {
+pub struct Cache<K, V> {
     accessed: Vec<K>,
     map: HashMap<K, V>,
     max_size: usize,
 }
 
-impl<K: Copy + Eq + Hash + Ord, V> LRUCache<K, V> for Cache<K, V> {
+impl<K: Copy + Eq + Hash, V> LRUCache<K, V> for Cache<K, V> {
     fn initialize(max: usize) -> Self {
         let map: HashMap<K, V> = HashMap::new();
         let accessed: Vec<K> = Vec::new();
@@ -42,7 +38,7 @@ impl<K: Copy + Eq + Hash + Ord, V> LRUCache<K, V> for Cache<K, V> {
     }
 
     fn set(&mut self, key: K, value: V) {
-        self.accessed.push(key.clone());
+        self.accessed.push(key);
         self.map.insert(key, value);
     }
 }
